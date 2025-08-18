@@ -15,6 +15,7 @@ public class PlayerMovement : MonoBehaviour
     private bool isGrounded;
 
     private Vector3 movement = Vector3.zero;
+    private Vector3 oldPos = Vector3.zero;
 
 
     private void Awake()
@@ -65,6 +66,13 @@ public class PlayerMovement : MonoBehaviour
         movement.Normalize();
 
         // Плавный поворот в сторону движения
+        //if (transform.position != oldPos)
+        //{
+        //    Quaternion targetRotation = Quaternion.LookRotation(movement);
+        //    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, _rotationSmoothness * Time.deltaTime);
+        //    oldPos = transform.position;
+        //}
+
         if (movement != Vector3.zero)
         {
             Quaternion targetRotation = Quaternion.LookRotation(movement);
