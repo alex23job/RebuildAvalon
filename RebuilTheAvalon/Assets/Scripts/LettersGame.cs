@@ -10,6 +10,8 @@ public class LettersGame : MonoBehaviour
     [SerializeField] private Button[] btnResultLetters;
     [SerializeField] private Text txtCount;
     [SerializeField] private Button btnCheck;
+    [SerializeField] private GameObject endPanel;
+    [SerializeField] private Text txtEnd;
 
     private string word = "";
     private string resultWord = "";
@@ -152,6 +154,9 @@ public class LettersGame : MonoBehaviour
             if (countCheck <= 0)
             {   //  loss
                 btnCheck.interactable = false;
+                txtEnd.text = (Language.Instance.CurrentLanguage == "ru") ? "Слово не угадано" : "The word is not guessed";
+                txtEnd.color = new Color(0.6f, 0, 0);
+                endPanel.SetActive(true);
             }
         }
         else return;
@@ -168,6 +173,11 @@ public class LettersGame : MonoBehaviour
 
         if (word == resultWord)
         {   //  win 
+            string s = (Language.Instance.CurrentLanguage == "ru") ? "Угадано слово" : "The word is guessed";
+            txtEnd.text = $"{s}   \"{resultWord}\"";
+            txtEnd.color = new Color(0, 0.8f, 0);
+            endPanel.SetActive(true);
+            GameManager.Instance.currentPlayer.totalScore += 10;
         }
     }
 }

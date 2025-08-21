@@ -33,15 +33,24 @@ public class PlayerMovement : MonoBehaviour
     // �������������
     void Start()
     {
+        transform.gameObject.SetActive(false);
+        Invoke("RestoredPosAndRot", 0.1f);
+    }
+
+    private void RestoredPosAndRot()
+    {
         try
         {
             transform.position = GameManager.Instance.currentPlayer.oldPosition;
             transform.rotation = Quaternion.Euler(GameManager.Instance.currentPlayer.oldRotation);
+            print($"Recover pos={transform.position} rot={transform.rotation}");
+            transform.gameObject.SetActive(true);
         }
         catch
         {
             Debug.Log("No GameManager loaded !");
         }
+
     }
 
     // Update is called once per frame
@@ -75,7 +84,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Turn(float input)
     {
-        rb.MoveRotation(rb.rotation * Quaternion.Euler(0, input * _rotationSmoothness * Time.deltaTime, 0));
+        rb.MoveRotation(rb.rotation * Quaternion.Euler(0, input * _rotationSmoothness * Time.fixedDeltaTime, 0));
         //transform.Rotate(0, input * _rotationSmoothness * Time.deltaTime, 0);
     }
 

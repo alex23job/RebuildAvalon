@@ -102,7 +102,7 @@ public class GameManager : MonoBehaviour
 
 
         //Debug.Log("Game data loaded! Score=" + GameManager.Instance.currentPlayer.totalScore.ToString() + "  Gold=" + GameManager.Instance.currentPlayer.totalGold.ToString());
-        Debug.Log($"Game data loaded! Score={GameManager.Instance.currentPlayer.totalScore}");
+        Debug.Log($"Game data loaded! Score={GameManager.Instance.currentPlayer.totalScore} Pos={GameManager.Instance.currentPlayer.oldPosition}");
 
         if (mm_control != null)
         {
