@@ -92,6 +92,7 @@ public class GameManager : MonoBehaviour
         GameManager.Instance.currentPlayer.totalScore = data.score;
         GameManager.Instance.currentPlayer.nameOldScene = data.scene;
         GameManager.Instance.currentPlayer.CsvToPosAndRot(data.posAndRot);
+        GameManager.Instance.currentPlayer.inventory = new Inventory(data.csvInventory);
 
         GameManager.Instance.currentPlayer.isHintView = data.isHints;
         GameManager.Instance.currentPlayer.isSoundFone = data.isFone;
@@ -125,6 +126,8 @@ public class GameManager : MonoBehaviour
 
         data.scene = GameManager.Instance.currentPlayer.nameOldScene;
         data.posAndRot = GameManager.Instance.currentPlayer.PosAndRotToCsvString();
+
+        data.csvInventory = GameManager.Instance.currentPlayer.inventory.ToCsvString();
 
         data.isHints = GameManager.Instance.currentPlayer.isHintView;
         data.isFone = GameManager.Instance.currentPlayer.isSoundFone;
@@ -161,6 +164,8 @@ public class PlayerInfo
     public Vector3 oldPosition = Vector3.zero;
     public Vector3 oldRotation = Vector3.zero;
 
+    public Inventory inventory;
+
     public int countSecond = 0;
     public int countLine = 0;
     public int countFigure = 0;
@@ -185,6 +190,7 @@ public class PlayerInfo
     {
         maxLevel = 1;
         currentLevel = 1;
+        inventory = new Inventory();
     }
 
     public static PlayerInfo FirstGame()
@@ -248,6 +254,7 @@ public class SaveData
     public int level = 1;
     public string scene = "";
     public string posAndRot = "";
+    public string csvInventory = "";
 
     public bool isFone;
     public bool isEffects;
