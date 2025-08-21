@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,6 +9,7 @@ public class LettersGame : MonoBehaviour
     [SerializeField] private Button[] btnLetters;
     [SerializeField] private Button[] btnResultLetters;
     [SerializeField] private Text txtCount;
+    [SerializeField] private Button btnCheck;
 
     private string word = "";
     private string resultWord = "";
@@ -19,7 +21,9 @@ public class LettersGame : MonoBehaviour
     {
         ClearLetters(btnResultLetters);
         ClearLetters(btnLetters);
-        SetGameParams("proba", 7, "probafreind");
+        //SetGameParams("proba", 7, "probafinds");
+        SetGameParams("книга", 7, "книгаморды");
+        btnCheck.interactable = true;
     }
 
     // Update is called once per frame
@@ -55,6 +59,7 @@ public class LettersGame : MonoBehaviour
     {
         int len = resultWord.Length;
         int startPos = -210 + 35 * (7 - len);
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < btnResultLetters.Length; i++)
         {
             if (i < len)
@@ -64,12 +69,20 @@ public class LettersGame : MonoBehaviour
                 pos.x = startPos + i * 70;
                 //print($"i={i}   btnPos={btnResultLetters[i].transform.position}   pos={pos}   localPos={btnResultLetters[i].transform.localPosition}");
                 btnResultLetters[i].transform.localPosition = pos;
+                sb.Append("?");
             }
             else
             {
                 btnResultLetters[i].gameObject.SetActive(false);
             }
         }
+        word = sb.ToString();
+    }
+
+    private void ViewResultWord()
+    {
+        int len = resultWord.Length;
+
     }
 
     private void SetBtnResultColor(int numColor, Button btn)
@@ -95,15 +108,66 @@ public class LettersGame : MonoBehaviour
 
     public void OnLetterClick(int num)
     {
-        
+        bool isFill = false;
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < word.Length; i++)
+        {
+            if (word[i] == '?' && isFill == false)
+            {
+                string s = btnLetters[num].transform.GetChild(0).gameObject.GetComponent<Text>().text;
+                sb.Append(s);
+                btnResultLetters[i].transform.GetChild(0).gameObject.GetComponent<Text>().text = s;
+                isFill = true;
+            }
+            else sb.Append(word[i]);
+        }
+        word = sb.ToString();
     }
 
     public void OnResultClick(int num)
     {
         print($"Btn Result {num}");
+        if (word[num] != '?')
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < word.Length; i++) 
+            {
+                if (i != num) sb.Append(word[i]);
+                else
+                {
+                    sb.Append("?");
+                    btnResultLetters[num].transform.GetChild(0).gameObject.GetComponent<Text>().text = "?";
+                }
+            }
+            word = sb.ToString();
+        }
     }
 
     public void OnCheckButtonClick()
     {
+        if (countCheck > 0)
+        {
+            countCheck--;
+            ViewAttempts();
+            if (countCheck <= 0)
+            {   //  loss
+                btnCheck.interactable = false;
+            }
+        }
+        else return;
+
+        for (int i = 0; i < resultWord.Length; i++)
+        {
+            if (word[i] == resultWord[i]) SetBtnResultColor(0, btnResultLetters[i]);
+            else
+            {
+                if (resultWord.Contains(word[i])) SetBtnResultColor(1, btnResultLetters[i]);
+                else SetBtnResultColor(2, btnResultLetters[i]);
+            }
+        }
+
+        if (word == resultWord)
+        {   //  win 
+        }
     }
 }
