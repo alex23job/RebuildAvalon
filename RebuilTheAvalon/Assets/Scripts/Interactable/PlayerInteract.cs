@@ -62,6 +62,19 @@ public class PlayerInteract : MonoBehaviour
         }
     }
 
+    public void SavePosAndRot()
+    {
+        try
+        {
+            GameManager.Instance.currentPlayer.oldPosition = transform.position;
+            GameManager.Instance.currentPlayer.oldRotation = transform.rotation.eulerAngles;
+        }
+        catch
+        {
+            Debug.Log("Not GameManager loaded !");
+        }
+    }
+
     private void PlayerLook()
     {
         Vector3 origin = transform.position;

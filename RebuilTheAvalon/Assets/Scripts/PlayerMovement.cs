@@ -33,6 +33,15 @@ public class PlayerMovement : MonoBehaviour
     // �������������
     void Start()
     {
+        try
+        {
+            transform.position = GameManager.Instance.currentPlayer.oldPosition;
+            transform.rotation = Quaternion.Euler(GameManager.Instance.currentPlayer.oldRotation);
+        }
+        catch
+        {
+            Debug.Log("No GameManager loaded !");
+        }
     }
 
     // Update is called once per frame

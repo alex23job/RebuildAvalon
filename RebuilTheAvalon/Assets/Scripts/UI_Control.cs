@@ -32,6 +32,7 @@ public class UI_Control : MonoBehaviour
 
     public void LoadMenuScene()
     {
+        GameManager.Instance.SaveGame();
         SceneManager.LoadScene("MainScene");
     }
 
