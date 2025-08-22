@@ -22,7 +22,9 @@ public class FollowCamera : MonoBehaviour
     public void OnZoom(InputAction.CallbackContext context)
     {
         // Обновляем расстояние зума
-        float scrollDelta = context.ReadValue<float>();
+        //float scrollDelta = context.ReadValue<float>();
+        float scrollDelta = context.ReadValue<Vector2>().y;
+        //print($"OnZoom scroll={scrollDelta}");
         currentZoom = Mathf.Clamp(currentZoom - scrollDelta, minZoom, maxZoom);
         distance = currentZoom;
     }
