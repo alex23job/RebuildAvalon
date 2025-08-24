@@ -17,6 +17,12 @@ public class FollowCamera : MonoBehaviour
     // Переменные для расчета
     private Vector3 velocity = Vector3.zero;
     private float currentZoom = 5f;
+    private float currentHeight;
+
+    private void Start()
+    {
+        currentHeight = height;
+    }
 
     // Обработка события зума
     public void OnZoom(InputAction.CallbackContext context)
@@ -27,13 +33,14 @@ public class FollowCamera : MonoBehaviour
         //print($"OnZoom scroll={scrollDelta}");
         currentZoom = Mathf.Clamp(currentZoom - scrollDelta, minZoom, maxZoom);
         distance = currentZoom;
+        currentHeight = height + 0.2f * (currentZoom - minZoom); 
     }
 
     // Обновление камеры
     void LateUpdate()
     {
         // Рассчитываем позицию камеры
-        Vector3 desiredPosition = target.position - target.forward * distance + Vector3.up * height;
+        Vector3 desiredPosition = target.position - target.forward * distance + Vector3.up * currentHeight;
 
         // Обновляем положение камеры
         transform.position = Vector3.SmoothDamp(transform.position, desiredPosition, ref velocity, rotationSmoothTime);
