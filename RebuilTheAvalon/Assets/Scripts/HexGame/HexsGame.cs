@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -8,6 +9,7 @@ public class HexsGame : MonoBehaviour
     [SerializeField] private GameObject[] hexTails;
     [SerializeField] private GameObject playerBoard;
     [SerializeField] private GameObject enemyBoard;
+    [SerializeField] private HexGameUI gameUI;
 
     private int numPlayerStart, numEnemyStart;
     private List<GameObject> playerWay;
@@ -15,6 +17,7 @@ public class HexsGame : MonoBehaviour
     private GameObject[] playerHexs;
     private GameObject[] enemyHexs;
     private int[] pole = new int[117];
+    private int numberWiner = 0;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -52,8 +55,8 @@ public class HexsGame : MonoBehaviour
                 if ((y % 2 == 1) && ((x > 9) && (x < 12))) listEn.Add(i);
             }            
         }
-        numPlayerStart = listPl[Random.Range(0, listPl.Count)];
-        numEnemyStart = listEn[Random.Range(0, listEn.Count)];
+        numPlayerStart = listPl[UnityEngine.Random.Range(0, listPl.Count)];
+        numEnemyStart = listEn[UnityEngine.Random.Range(0, listEn.Count)];
         print($"pl={numPlayerStart} en={numEnemyStart}");
         for (i = 0; i < 117; i++)
         {
@@ -119,7 +122,9 @@ public class HexsGame : MonoBehaviour
 
     private GameObject GenerateHex(Vector3 pos)
     {
-        int numTail, rndTail = Random.Range(0, 24);
+        if ((numberWiner > 0) && (gameUI != null)) gameUI.ViewEndPanel(numberWiner);
+
+        int numTail, rndTail = UnityEngine.Random.Range(0, 24);
         int[] nums = new int[24] {1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 7};
         numTail = nums[rndTail];
         GameObject hexTail = Instantiate(hexTails[numTail], pos, Quaternion.Euler(180f, 0, 0));
@@ -133,7 +138,7 @@ public class HexsGame : MonoBehaviour
         int x = Mathf.RoundToInt((hexTail.transform.position.x + 12 - y % 2) / 2);
         HexTail hexCnt = hexTail.GetComponent<HexTail>();
         int num = 13 * y + x;
-        if (pole[num] == 0)
+        if (num >= 0 && num < 117 && pole[num] == 0)
         {
             if (TestConnect(x, y, hexCnt.TailAngle, hexCnt.TailID))
             {
@@ -144,11 +149,13 @@ public class HexsGame : MonoBehaviour
                 int index = Mathf.RoundToInt(start.x - playerBoard.transform.position.x);
                 if (index < 0) index = 0;
                 playerHexs[index] = null;
+                CheckingFinishWay(x, y, hexCnt.TailAngle, hexCnt.TailDoors, 1);
                 CreatePlayerHex();
+                MakeEnemyStep();
                 return true;
             }
         }
-        print($"x={x} y={y} num={num} pole[num]={pole[num]}");
+        //print($"x={x} y={y} num={num} pole[num]={pole[num]}");
         finalPos = Vector3.zero;
         return false;
     }
@@ -239,11 +246,44 @@ public class HexsGame : MonoBehaviour
     {
         //  ang1 и door1 - пристыковываемый hex
         //  ang2 и door2 - hex, к которому пробуем стыковать 
-        int mask1 = (door1 >> (((ang1 + dv) / 60) % 6)) & 1;
-        int mask2 = (door2 >> (((ang2 + dv + 180) / 60) % 6)) & 1;
+        //int mask1 = (door1 >> (((ang1 + dv) / 60) % 6)) & 1;
+        //int mask2 = (door2 >> (((ang2 + dv + 180) / 60) % 6)) & 1;
+        int mask1 = (door1 >> (((720 - ang1 + dv) / 60) % 6)) & 1;
+        int mask2 = (door2 >> (((720 - ang2 + dv + 180) / 60) % 6)) & 1;
         print($"a1={ang1} d1={door1} a2={ang2} d2={door2} dv={dv} m1={mask1} m2={mask2}");
-        if (mask1 == mask2) return true;
+        //if (mask1 == mask2) return true;
+        if ((mask1 == 1) && (mask2 == 1)) return true;
         return false;
+    }
+
+    private void CheckingFinishWay(int x, int y, int angle, int door, int numWin)
+    {
+        int fx = 58 % 13, fy = 58 / 13;
+        int dv = GetDeltaAngle(x, y, fx, fy);
+        int mask = -1;
+        //if ((fy == y) && ((fx == x + 1) || (fx == x - 1))) mask = (door >> (((720 + angle - dv + 180) / 60) % 6)) & 1;
+        //else if ((y == fy + 1) && ((x == fx) || (((x == fx - 1) && (y % 2 == 1)) || ((x == fx + 1) && (y % 2 == 0))))) mask = (door >> (((720 + angle - dv + 180) / 60) % 6)) & 1;
+        //else if ((y == fy - 1) && ((x == fx) || (((x == fx - 1) && (y % 2 == 1)) || ((x == fx + 1) && (y % 2 == 0))))) mask = (door >> (((720 + angle - dv + 180) / 60) % 6)) & 1;
+        if ((fy == y) && ((fx == x + 1) || (fx == x - 1))) mask = (door >> (((720 - angle + dv) / 60) % 6)) & 1;
+        else if ((y == fy + 1) && ((x == fx) || (((x == fx - 1) && (y % 2 == 1)) || ((x == fx + 1) && (y % 2 == 0))))) mask = (door >> (((720 - angle + dv) / 60) % 6)) & 1;
+        else if ((y == fy - 1) && ((x == fx) || (((x == fx - 1) && (y % 2 == 1)) || ((x == fx + 1) && (y % 2 == 0))))) mask = (door >> (((720 - angle + dv) / 60) % 6)) & 1;
+        print($"CheckingFinishWay x={x} y={y} angle={angle} door={door} dv={dv} mask={mask}");
+        if (mask > 0) numberWiner = numWin;
+    }
+
+    private int GetDeltaAngle(float x1, float z1, float x2, float z2)
+    {
+        Vector3 tv = new Vector3(-12 + 2 * x1 + z1 % 2, 0, 6.8f - 1.7f * z1);
+        Vector3 cur = new Vector3(-12 + 2 * x2 + z2 % 2, 0, 6.8f - 1.7f * z2);
+        //print($"dv={Vector3.Angle(Vector3.right, tv - cur)}");
+        int dv = Mathf.RoundToInt(Vector3.Angle(Vector3.right, tv - cur));
+        if (z2 == z1 + 1) dv = 360 - dv;
+        return dv;
+    }
+
+    private void MakeEnemyStep()
+    {
+
     }
 
     public void LoadCityScene()
