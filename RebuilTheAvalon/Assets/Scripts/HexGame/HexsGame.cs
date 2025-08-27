@@ -1,6 +1,8 @@
 using NUnit.Framework;
 using System.Collections.Generic;
+using System.Text;
 using Unity.Mathematics;
+using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -283,11 +285,207 @@ public class HexsGame : MonoBehaviour
 
     private void MakeEnemyStep()
     {
+        List<HexCandidat> listHex = new List<HexCandidat>();
+        int x = 58 % 13, y = 58 / 13, ang, tx, ty, tAng, tDoor;
+        foreach (GameObject hexTail in enemyWay)
+        {
+            HexTail hexCnt = hexTail.GetComponent<HexTail>();
+            ty = Mathf.RoundToInt((6.8f - hexTail.transform.position.z) / 1.7f);
+            tx = Mathf.RoundToInt((hexTail.transform.position.x + 12 - ty % 2) / 2);
+            tAng = hexCnt.TailAngle; tDoor = hexCnt.TailDoors;
+            if ((tx < 12 && ty % 2 == 0) || (tx < 11 && ty % 2 == 1))
+            {
+                if ((pole[13 * ty + tx + 1] == 0) && ((tDoor & 0x1) > 0)) listHex.Add(new HexCandidat(tx + 1, ty, 0, Mathf.Abs(ty - y) + Mathf.Abs(tx + 1 - x)));
+            }
+            if (tx > 0)
+            {
+                if ((pole[13 * ty + tx - 1] == 0) && ((tDoor & 0x8) > 0)) listHex.Add(new HexCandidat(tx - 1, ty, 180, Mathf.Abs(ty - y) + Mathf.Abs(tx - 1 - x)));
+            }
+            if (ty % 2 == 0)
+            {
+                if (ty > 0)
+                {
+                    if ((tx < 12) && (pole[13 * (ty - 1) + tx] == 0) && ((tDoor & 0x20) > 0)) listHex.Add(new HexCandidat(tx, ty - 1, 300, Mathf.Abs(ty - 1 - y) + Mathf.Abs(tx - x)));
+                    if ((pole[13 * (ty - 1) + (tx - 1)] == 0) && ((tDoor & 0x10) > 0)) listHex.Add(new HexCandidat(tx - 1, ty - 1, 240, Mathf.Abs(ty - 1 - y) + Mathf.Abs(tx - 1 - x)));
+                }
+                if (ty < 8)
+                {
+                    if ((tx < 12) && (pole[13 * (ty + 1) + tx] == 0) && ((tDoor & 0x2) > 0)) listHex.Add(new HexCandidat(tx, ty + 1, 60, Mathf.Abs(ty + 1 - y) + Mathf.Abs(tx - x)));
+                    if ((pole[13 * (ty + 1) + (tx - 1)] == 0) && ((tDoor & 0x4) > 0)) listHex.Add(new HexCandidat(tx - 1, ty + 1, 120, Mathf.Abs(ty + 1 - y) + Mathf.Abs(tx - 1 - x)));
+                }
+            }
+            if (ty % 2 == 1)
+            {
+                if (ty > 0 && tx < 12)
+                {
+                    if ((pole[13 * (ty - 1) + tx] == 0) && ((tDoor & 0x10) > 0)) listHex.Add(new HexCandidat(tx, ty - 1, 240, Mathf.Abs(ty - 1 - y) + Mathf.Abs(tx - x)));
+                    if ((pole[13 * (ty - 1) + (tx + 1)] == 0) && ((tDoor & 0x20) > 0)) listHex.Add(new HexCandidat(tx + 1, ty - 1, 300, Mathf.Abs(ty - 1 - y) + Mathf.Abs(tx + 1 - x)));
+                }
+                if (ty < 8 && tx < 12)
+                {
+                    if ((pole[13 * (ty + 1) + tx] == 0) && ((tDoor & 0x4) > 0)) listHex.Add(new HexCandidat(tx, ty + 1, 120, Mathf.Abs(ty + 1 - y) + Mathf.Abs(tx - x)));
+                    if ((pole[13 * (ty + 1) + (tx + 1)] == 0) && ((tDoor & 0x2) > 0)) listHex.Add(new HexCandidat(tx + 1, ty + 1, 60, Mathf.Abs(ty + 1 - y) + Mathf.Abs(tx + 1 - x)));
+                }
+            }
+        }
+        listHex.Sort((h1, h2) => h1.R.CompareTo(h2.R));
+        foreach(HexCandidat hex in listHex)
+        {
+            hex.CheckHexTail(0, enemyHexs[0].GetComponent<HexTail>(), pole);
+            hex.CheckHexTail(1, enemyHexs[1].GetComponent<HexTail>(), pole);
+        }
+        PairRotateDistance res = new PairRotateDistance(5, 720, 15);
+        HexCandidat candidat = null;
+        foreach (HexCandidat hex in listHex)
+        {
+            res = hex.GetMinDist(res, out HexCandidat hexCandidat);
+            if (hexCandidat != null) { candidat = hexCandidat; }
+        }
+        if (res.num == 0 || res.num == 1)
+        {
+            HexTail enemyHexCnt = enemyHexs[res.num].GetComponent<HexTail>();
+            Vector3 target = new Vector3(-12 + 2 * candidat.X + candidat.Y % 2, 1.5f, 6.8f - 1.7f * candidat.Y);
+            pole[13 * candidat.Y + candidat.X] = enemyHexCnt.TailID;
+            enemyHexCnt.SetTargetWay(target, res.Rot);
+            enemyWay.Add(enemyHexs[res.num]);
+            enemyHexs[res.num] = null;
+            if (res.Dist == 0)
+            {   //  enemy win ?!
+                numberWiner = 2;
+            }
+            CreateEnemyHex();
+        }
 
+        StringBuilder sb = new StringBuilder($"res={res}  ");
+        for (int i = 0; i < listHex.Count; i++)
+        {
+            sb.Append(listHex[i].ToString() + "  ");
+        }
+        print(sb.ToString());
     }
 
     public void LoadCityScene()
     {
         SceneManager.LoadScene("CityScene");
     }
+}
+
+public class HexCandidat
+{
+    private int x, y;
+    private int angle;
+    private int r;
+    private int numTail;
+    private int tailID;
+    private List<PairRotateDistance> listRes = new List<PairRotateDistance>();
+
+    public int R { get => r; }
+    public int X { get => x; }
+    public int Y { get => y; }
+    public int Angle { get => angle; }
+    public int NumTail { get => numTail; }
+    public int TailID { get => tailID; }
+
+    public HexCandidat() { }
+    public HexCandidat(int x, int y, int angle, int r)
+    {
+        this.x = x;
+        this.y = y;
+        this.angle = angle;
+        this.r = r;
+    }
+
+    public void CheckHexTail(int num, HexTail hexTail, int[] pole)
+    {
+        int i, mask, curShift, j, d;
+        for (i = 0; i < 6; i++) 
+        {
+            mask = (hexTail.TailDoors >> (((720 - hexTail.TailAngle + this.angle + i * 60) / 60) % 6)) & 1;
+            if (mask > 0)
+            {
+                curShift = ((720 - hexTail.TailAngle + this.angle + i * 60) / 60) % 6;
+                for(j = 1; j < 6; j++)
+                {
+                    if ((hexTail.TailDoors & (1 << ((curShift + j) % 6))) > 0)
+                    {   //  нашли ещё 1 выход из фишки -> надо проверить пустая ли рядом клетка и если да то вычислить расстояние и добавить пару                        
+                        //d = GetDist(j, pole);
+                        d = GetDist((curShift + j) % 6, pole);
+                        if (d >= 0)
+                        {
+                            int sh = (6 - i) % 6;
+                            listRes.Add(new PairRotateDistance(num, sh * 60, d));
+                            Debug.Log($"turn num={num}(d={hexTail.TailDoors} a={hexTail.TailAngle}) x={x} y={y} angle={angle} => i={i}({i * 60}) j={j}(sh={(curShift + j) % 6}) dist={d}");
+                        }
+                    }
+                }                
+            }
+        }
+    }
+
+    private int GetDist(int sh, int[] pole)
+    {
+        int[] dj_x_0 = new int[6] { 0, 0, -1, -1, -1, 0 };
+        int[] dj_x_1 = new int[6] { 0, 1, 0, -1, 0, 1 };
+        int[] dj_y = new int[6] { 0, 1, 1, 0, -1, -1 };
+        int dx = x + ((y % 2 == 1) ? dj_x_1[sh] : dj_x_0[sh]);
+        int dy = y +  dj_y[sh];
+        if ((dy < 0) || (dy > 8)) return -1;
+        if (dx < 0) return -1;
+        if (((dy % 2 == 0) && (dx < 13)) || ((dy % 2 == 1) && (dx < 12)))
+        {
+            int fx = 58 % 13, fy = 58 / 13;
+            if (fy == dy && fx == dx) return 0;
+            if (pole[13 * dy + dx] == 0)
+            {            
+                //Debug.Log($"GetDist sh={sh} x={x} dx={dx} y={y} dy={dy}  dist={Mathf.Abs(fy - dy) + Mathf.Abs(fx - dx)}");
+                return Mathf.Abs(fy - dy) + Mathf.Abs(fx - dx);
+            }
+        }
+        return -1;
+    }
+
+    public PairRotateDistance GetMinDist(PairRotateDistance curMin, out HexCandidat candidat)
+    {
+        candidat = null;
+        PairRotateDistance res = new PairRotateDistance(curMin.Number, curMin.Rot, curMin.Dist);
+        foreach(PairRotateDistance pair in listRes)
+        {
+            if (pair.Dist < res.Dist)
+            {
+                res = new PairRotateDistance (pair.Number, pair.Rot, pair.Dist);
+                candidat = this;
+            }
+        }
+        return res;
+    }
+
+    public override string ToString()
+    {
+        StringBuilder sb = new StringBuilder();
+        foreach (PairRotateDistance d in listRes) { sb.Append($"{d} "); }
+        return $"<{x}, {y}, {angle} gr, R={r}, num={numTail}(id={tailID}), {sb.ToString()}>";
+    }
+}
+
+public class PairRotateDistance
+{
+    public int num;
+    private int rot;
+    private int dist;
+
+    public PairRotateDistance() { }
+    public PairRotateDistance(int n, int r, int d)
+    {
+        num = n;
+        rot = r;
+        dist = d;
+    }
+    public override string ToString()
+    {
+        return $"<= num={num} r({rot}), d({dist})=>";
+    }
+
+    public int Number { get => num; }
+    public int Rot { get => rot; }
+    public int Dist { get => dist; }
 }

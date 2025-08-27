@@ -17,10 +17,12 @@ public class HexTail : MonoBehaviour
 
     private bool isRotation = false;
     private bool isMove = false;
+    private bool isMovement = false;
     private bool isWay = false;
     private Vector3 startPos;
     private Vector3 deltaPos = Vector3.zero;
     private float targetAngle = 0f;
+    private Vector3 target;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -31,6 +33,26 @@ public class HexTail : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (isMovement)
+        {
+            Vector3 delta = transform.position - target;
+            if (delta.magnitude > 0.2f)
+            {
+                Vector3 movement = delta.normalized * moveSpeed * Time.deltaTime;
+                Vector3 dm = transform.position - movement - target;
+                if (dm.magnitude > 0.2f) transform.position -= movement;
+                else
+                {
+                    transform.position = target;
+                    isMovement = false;
+                }
+            }
+            else
+            {
+                transform.position = target;
+                isMovement = false;
+            }
+        }
         //if (isRotation)
         //{
         //    Vector3 rotEuler = transform.rotation.eulerAngles;
@@ -66,7 +88,14 @@ public class HexTail : MonoBehaviour
         isWay = way;
     }
 
-
+    public void SetTargetWay(Vector3 tg, float rot)
+    {
+        //print($"SetTargetWay =>> tg={tg} rot={rot}");
+        target = tg;
+        //if (rot > 0) transform.Rotate(-180f, rot, 0, Space.World);
+        if (rot > 0) transform.rotation = Quaternion.Euler(180f, rot, 0);
+        isMovement = true;
+    }
 
     private void OnMouseDown()
     {
