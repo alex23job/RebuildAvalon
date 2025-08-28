@@ -92,6 +92,14 @@ public class HexsGame : MonoBehaviour
             tail = Instantiate(hexTails[0], pos, Quaternion.Euler(0, 0, 0));
             tail.GetComponent<HexTail>().SetParams(0, this, true);
         }
+        /*for (i = 111; i < 117; i++)
+        {
+            x = i % 13; y = i / 13;
+            pos.x = -12 + 2 * x + y % 2;
+            pos.y = 1.5f;
+            pos.z = 6.8f - 1.7f * y;
+            tail = Instantiate(hexTails[3], pos, Quaternion.Euler(180f, 60 * (i - 111), 0));
+        }*/
     }
 
     private void CreatePlayerHex()
@@ -124,14 +132,20 @@ public class HexsGame : MonoBehaviour
 
     private GameObject GenerateHex(Vector3 pos)
     {
-        if ((numberWiner > 0) && (gameUI != null)) gameUI.ViewEndPanel(numberWiner);
+        if ((numberWiner > 0) && (gameUI != null)) Invoke("ViewEndPanel", 2f); 
 
         int numTail, rndTail = UnityEngine.Random.Range(0, 24);
-        int[] nums = new int[24] {1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 7};
+        int[] nums = new int[24] { 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 7 };
+        //int[] nums = new int[24] { 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 5, 5, 5, 2, 3, 3 };
         numTail = nums[rndTail];
         GameObject hexTail = Instantiate(hexTails[numTail], pos, Quaternion.Euler(180f, 0, 0));
         hexTail.GetComponent<HexTail>().SetParams(numTail, this);
         return hexTail;
+    }
+
+    private void ViewEndPanel()
+    {
+        gameUI.ViewEndPanel(numberWiner);
     }
 
     public bool TestHex(GameObject hexTail, out Vector3 finalPos)
@@ -190,56 +204,6 @@ public class HexsGame : MonoBehaviour
             {
                 if (CheckingConnectivity(angle, doors[tailID], hexTail.TailAngle, hexTail.TailDoors, dv)) return true;
             }
-            /*if (y == ty)
-            {
-                if (x == tx - 1)
-                {
-                    //print($"dv={180}");
-                    dv = 180;
-                    return CheckingConnectivity(angle, doors[tailID], hexTail.TailAngle, hexTail.TailDoors, dv);
-                    //return true;
-                }
-                if (x == tx + 1)
-                {
-                    //print($"dv={0}");
-                    return CheckingConnectivity(angle, doors[tailID], hexTail.TailAngle, hexTail.TailDoors, dv);
-                    //return true;
-                }
-            }
-            if (y == ty + 1)
-            {
-                if (x == tx)
-                {
-                    if (y % 2 == 1) dv = 60; // print($"dv={60}");
-                    if (y % 2 == 0) dv = 120; // print($"dv={120}");
-                    return CheckingConnectivity(angle, doors[tailID], hexTail.TailAngle, hexTail.TailDoors, dv);
-                    //return true;
-                }
-                if (((x == tx - 1) && (y % 2 == 1)) || ((x == tx + 1) && (y % 2 == 0))) 
-                {
-                    if ((x == tx - 1) && (y % 2 == 1)) dv = 120;    // print($"dv={120}");
-                    if ((x == tx + 1) && (y % 2 == 0)) dv = 60; // print($"dv={60}");
-                    return CheckingConnectivity(angle, doors[tailID], hexTail.TailAngle, hexTail.TailDoors, dv); 
-                    //return true;
-                }
-            }
-            if (y == ty - 1)
-            {
-                if (x == tx)
-                {
-                    if (y % 2 == 1) dv = 300;   // print($"dv={300}");
-                    if (y % 2 == 0) dv = 240;   // print($"dv={240}");
-                    return CheckingConnectivity(angle, doors[tailID], hexTail.TailAngle, hexTail.TailDoors, dv); 
-                    //return true;
-                }
-                if (((x == tx - 1) && (y % 2 == 1)) || ((x == tx + 1) && (y % 2 == 0)))
-                {
-                    if ((x == tx - 1) && (y % 2 == 1)) dv = 240;    // print($"dv={240}");
-                    if ((x == tx + 1) && (y % 2 == 0)) dv = 300;    // print($"dv={300}");
-                    return CheckingConnectivity(angle, doors[tailID], hexTail.TailAngle, hexTail.TailDoors, dv); 
-                    //return true;
-                }
-            }*/
         }
         return false;
     }
@@ -293,38 +257,51 @@ public class HexsGame : MonoBehaviour
             ty = Mathf.RoundToInt((6.8f - hexTail.transform.position.z) / 1.7f);
             tx = Mathf.RoundToInt((hexTail.transform.position.x + 12 - ty % 2) / 2);
             tAng = hexCnt.TailAngle; tDoor = hexCnt.TailDoors;
+            ang = (360 + hexCnt.TailAngle - 180) / 60; ang %= 6;
+            for (int j = 0; j < ang; j++) { tDoor = ((tDoor << 1) & 0x3f) + ((tDoor >> 5) & 1); }
+            //print($"Shift tDoor => TailAngle={tAng} TailDoor={hexCnt.TailDoors}  tDoor={tDoor}");
             if ((tx < 12 && ty % 2 == 0) || (tx < 11 && ty % 2 == 1))
             {
-                if ((pole[13 * ty + tx + 1] == 0) && ((tDoor & 0x1) > 0)) listHex.Add(new HexCandidat(tx + 1, ty, 0, Mathf.Abs(ty - y) + Mathf.Abs(tx + 1 - x)));
+                //if ((pole[13 * ty + tx + 1] == 0) && ((tDoor & 0x1) > 0)) listHex.Add(new HexCandidat(tx + 1, ty, 0, Mathf.Abs(ty - y) + Mathf.Abs(tx + 1 - x)));
+                if ((pole[13 * ty + tx + 1] == 0) && ((tDoor & 0x1) > 0)) listHex.Add(new HexCandidat(tx + 1, ty, 0, GetDist(tx + 1, ty, x, y)));
             }
             if (tx > 0)
             {
-                if ((pole[13 * ty + tx - 1] == 0) && ((tDoor & 0x8) > 0)) listHex.Add(new HexCandidat(tx - 1, ty, 180, Mathf.Abs(ty - y) + Mathf.Abs(tx - 1 - x)));
+                //if ((pole[13 * ty + tx - 1] == 0) && ((tDoor & 0x8) > 0)) listHex.Add(new HexCandidat(tx - 1, ty, 180, Mathf.Abs(ty - y) + Mathf.Abs(tx - 1 - x)));
+                if ((pole[13 * ty + tx - 1] == 0) && ((tDoor & 0x8) > 0)) listHex.Add(new HexCandidat(tx - 1, ty, 180, GetDist(tx - 1, ty, x, y)));
             }
             if (ty % 2 == 0)
             {
                 if (ty > 0)
                 {
-                    if ((tx < 12) && (pole[13 * (ty - 1) + tx] == 0) && ((tDoor & 0x20) > 0)) listHex.Add(new HexCandidat(tx, ty - 1, 300, Mathf.Abs(ty - 1 - y) + Mathf.Abs(tx - x)));
-                    if ((pole[13 * (ty - 1) + (tx - 1)] == 0) && ((tDoor & 0x10) > 0)) listHex.Add(new HexCandidat(tx - 1, ty - 1, 240, Mathf.Abs(ty - 1 - y) + Mathf.Abs(tx - 1 - x)));
+                    //if ((tx < 12) && (pole[13 * (ty - 1) + tx] == 0) && ((tDoor & 0x20) > 0)) listHex.Add(new HexCandidat(tx, ty - 1, 300, Mathf.Abs(ty - 1 - y) + Mathf.Abs(tx - x)));
+                    if ((tx < 12) && (pole[13 * (ty - 1) + tx] == 0) && ((tDoor & 0x20) > 0)) listHex.Add(new HexCandidat(tx, ty - 1, 300, GetDist(tx, ty - 1, x, y)));
+                    //if ((pole[13 * (ty - 1) + (tx - 1)] == 0) && ((tDoor & 0x10) > 0)) listHex.Add(new HexCandidat(tx - 1, ty - 1, 240, Mathf.Abs(ty - 1 - y) + Mathf.Abs(tx - 1 - x)));
+                    if ((pole[13 * (ty - 1) + (tx - 1)] == 0) && ((tDoor & 0x10) > 0)) listHex.Add(new HexCandidat(tx - 1, ty - 1, 240, GetDist(tx - 1, ty - 1, x, y)));
                 }
                 if (ty < 8)
                 {
-                    if ((tx < 12) && (pole[13 * (ty + 1) + tx] == 0) && ((tDoor & 0x2) > 0)) listHex.Add(new HexCandidat(tx, ty + 1, 60, Mathf.Abs(ty + 1 - y) + Mathf.Abs(tx - x)));
-                    if ((pole[13 * (ty + 1) + (tx - 1)] == 0) && ((tDoor & 0x4) > 0)) listHex.Add(new HexCandidat(tx - 1, ty + 1, 120, Mathf.Abs(ty + 1 - y) + Mathf.Abs(tx - 1 - x)));
+                    //if ((tx < 12) && (pole[13 * (ty + 1) + tx] == 0) && ((tDoor & 0x2) > 0)) listHex.Add(new HexCandidat(tx, ty + 1, 60, Mathf.Abs(ty + 1 - y) + Mathf.Abs(tx - x)));
+                    if ((tx < 12) && (pole[13 * (ty + 1) + tx] == 0) && ((tDoor & 0x2) > 0)) listHex.Add(new HexCandidat(tx, ty + 1, 60, GetDist(tx, ty + 1, x, y)));
+                    //if ((pole[13 * (ty + 1) + (tx - 1)] == 0) && ((tDoor & 0x4) > 0)) listHex.Add(new HexCandidat(tx - 1, ty + 1, 120, Mathf.Abs(ty + 1 - y) + Mathf.Abs(tx - 1 - x)));
+                    if ((pole[13 * (ty + 1) + (tx - 1)] == 0) && ((tDoor & 0x4) > 0)) listHex.Add(new HexCandidat(tx - 1, ty + 1, 120, GetDist(tx - 1, ty + 1, x, y)));
                 }
             }
             if (ty % 2 == 1)
             {
                 if (ty > 0 && tx < 12)
                 {
-                    if ((pole[13 * (ty - 1) + tx] == 0) && ((tDoor & 0x10) > 0)) listHex.Add(new HexCandidat(tx, ty - 1, 240, Mathf.Abs(ty - 1 - y) + Mathf.Abs(tx - x)));
-                    if ((pole[13 * (ty - 1) + (tx + 1)] == 0) && ((tDoor & 0x20) > 0)) listHex.Add(new HexCandidat(tx + 1, ty - 1, 300, Mathf.Abs(ty - 1 - y) + Mathf.Abs(tx + 1 - x)));
+                    //if ((pole[13 * (ty - 1) + tx] == 0) && ((tDoor & 0x10) > 0)) listHex.Add(new HexCandidat(tx, ty - 1, 240, Mathf.Abs(ty - 1 - y) + Mathf.Abs(tx - x)));
+                    if ((pole[13 * (ty - 1) + tx] == 0) && ((tDoor & 0x10) > 0)) listHex.Add(new HexCandidat(tx, ty - 1, 240, GetDist(tx, ty - 1, x, y)));
+                    //if ((pole[13 * (ty - 1) + (tx + 1)] == 0) && ((tDoor & 0x20) > 0)) listHex.Add(new HexCandidat(tx + 1, ty - 1, 300, Mathf.Abs(ty - 1 - y) + Mathf.Abs(tx + 1 - x)));
+                    if ((pole[13 * (ty - 1) + (tx + 1)] == 0) && ((tDoor & 0x20) > 0)) listHex.Add(new HexCandidat(tx + 1, ty - 1, 300, GetDist(tx + 1, ty - 1, x, y)));
                 }
                 if (ty < 8 && tx < 12)
                 {
-                    if ((pole[13 * (ty + 1) + tx] == 0) && ((tDoor & 0x4) > 0)) listHex.Add(new HexCandidat(tx, ty + 1, 120, Mathf.Abs(ty + 1 - y) + Mathf.Abs(tx - x)));
-                    if ((pole[13 * (ty + 1) + (tx + 1)] == 0) && ((tDoor & 0x2) > 0)) listHex.Add(new HexCandidat(tx + 1, ty + 1, 60, Mathf.Abs(ty + 1 - y) + Mathf.Abs(tx + 1 - x)));
+                    //if ((pole[13 * (ty + 1) + tx] == 0) && ((tDoor & 0x4) > 0)) listHex.Add(new HexCandidat(tx, ty + 1, 120, Mathf.Abs(ty + 1 - y) + Mathf.Abs(tx - x)));
+                    if ((pole[13 * (ty + 1) + tx] == 0) && ((tDoor & 0x4) > 0)) listHex.Add(new HexCandidat(tx, ty + 1, 120, GetDist(tx, ty + 1, x, y)));
+                    //if ((pole[13 * (ty + 1) + (tx + 1)] == 0) && ((tDoor & 0x2) > 0)) listHex.Add(new HexCandidat(tx + 1, ty + 1, 60, Mathf.Abs(ty + 1 - y) + Mathf.Abs(tx + 1 - x)));
+                    if ((pole[13 * (ty + 1) + (tx + 1)] == 0) && ((tDoor & 0x2) > 0)) listHex.Add(new HexCandidat(tx + 1, ty + 1, 60, GetDist(tx + 1, ty + 1, x, y)));
                 }
             }
         }
@@ -364,6 +341,14 @@ public class HexsGame : MonoBehaviour
         print(sb.ToString());
     }
 
+    private int GetDist(int x1, int y1, int x2, int y2)
+    {
+        int ry = Mathf.Abs(y1 - y2), rx = Mathf.Abs(x1 - x2);
+        if ((ry > 1) && (rx > 1)) rx -= ry / 2;
+        //Debug.Log($"GetDist sh={sh} x={x} dx={dx} y={y} dy={dy}  dist={Mathf.Abs(fy - dy) + Mathf.Abs(fx - dx)}");
+        return ry + rx;
+    }
+
     public void LoadCityScene()
     {
         SceneManager.LoadScene("CityScene");
@@ -400,21 +385,29 @@ public class HexCandidat
         int i, mask, curShift, j, d;
         for (i = 0; i < 6; i++) 
         {
-            mask = (hexTail.TailDoors >> (((720 - hexTail.TailAngle + this.angle + i * 60) / 60) % 6)) & 1;
+            //mask = (hexTail.TailDoors >> (((720 - hexTail.TailAngle + this.angle + i * 60) / 60) % 6)) & 1;
+            mask = (hexTail.TailDoors >> (((720 - hexTail.TailAngle + this.angle - i * 60) / 60) % 6)) & 1;
             if (mask > 0)
             {
-                curShift = ((720 - hexTail.TailAngle + this.angle + i * 60) / 60) % 6;
-                for(j = 1; j < 6; j++)
+                //curShift = ((720 - hexTail.TailAngle + this.angle + i * 60) / 60) % 6;
+                curShift = ((720 - hexTail.TailAngle + this.angle - i * 60) / 60) % 6;
+                int tDoor = hexTail.TailDoors;
+                for (j = 0; j < i; j++) { tDoor = ((tDoor << 1) & 0x3f) + ((tDoor >> 5) & 1); }
+                for (j = 1; j < 6; j++)
                 {
-                    if ((hexTail.TailDoors & (1 << ((curShift + j) % 6))) > 0)
+                    if ((tDoor & (1 << ((curShift + j) % 6))) > 0)
+                    //if ((hexTail.TailDoors & (1 << ((curShift + j) % 6))) > 0)
+                    //if ((hexTail.TailDoors & (1 << ((6 + curShift - j) % 6))) > 0)
                     {   //  нашли ещё 1 выход из фишки -> надо проверить пустая ли рядом клетка и если да то вычислить расстояние и добавить пару                        
                         //d = GetDist(j, pole);
                         d = GetDist((curShift + j) % 6, pole);
+                        //d = GetDist((6 + curShift - j) % 6, pole);
                         if (d >= 0)
                         {
-                            int sh = (6 - i) % 6;
+                            int sh = i;
+                            //int sh = (6 - i) % 6;
                             listRes.Add(new PairRotateDistance(num, sh * 60, d));
-                            Debug.Log($"turn num={num}(d={hexTail.TailDoors} a={hexTail.TailAngle}) x={x} y={y} angle={angle} => i={i}({i * 60}) j={j}(sh={(curShift + j) % 6}) dist={d}");
+                            Debug.Log($"turn num={num}(d={hexTail.TailDoors}(tDoor={tDoor}) a={hexTail.TailAngle}) x={x} y={y} angle={angle} => i={i}({i * 60}) j={j}(sh={(curShift + j) % 6}) dist={d}");
                         }
                     }
                 }                
@@ -424,8 +417,8 @@ public class HexCandidat
 
     private int GetDist(int sh, int[] pole)
     {
-        int[] dj_x_0 = new int[6] { 0, 0, -1, -1, -1, 0 };
-        int[] dj_x_1 = new int[6] { 0, 1, 0, -1, 0, 1 };
+        int[] dj_x_0 = new int[6] { 1, 0, -1, -1, -1, 0 };
+        int[] dj_x_1 = new int[6] { 1, 1, 0, -1, 0, 1 };
         int[] dj_y = new int[6] { 0, 1, 1, 0, -1, -1 };
         int dx = x + ((y % 2 == 1) ? dj_x_1[sh] : dj_x_0[sh]);
         int dy = y +  dj_y[sh];
@@ -434,11 +427,13 @@ public class HexCandidat
         if (((dy % 2 == 0) && (dx < 13)) || ((dy % 2 == 1) && (dx < 12)))
         {
             int fx = 58 % 13, fy = 58 / 13;
-            if (fy == dy && fx == dx) return 0;
+            if ((fy == dy) && (fx == dx)) return 0;
             if (pole[13 * dy + dx] == 0)
-            {            
+            {
+                int ry = Mathf.Abs(fy - dy), rx = Mathf.Abs(fx - dx);
+                if ((ry > 1) && (rx > 1)) rx -= ry / 2;
                 //Debug.Log($"GetDist sh={sh} x={x} dx={dx} y={y} dy={dy}  dist={Mathf.Abs(fy - dy) + Mathf.Abs(fx - dx)}");
-                return Mathf.Abs(fy - dy) + Mathf.Abs(fx - dx);
+                return ry + rx;
             }
         }
         return -1;
@@ -463,7 +458,8 @@ public class HexCandidat
     {
         StringBuilder sb = new StringBuilder();
         foreach (PairRotateDistance d in listRes) { sb.Append($"{d} "); }
-        return $"<{x}, {y}, {angle} gr, R={r}, num={numTail}(id={tailID}), {sb.ToString()}>";
+        //return $"<{x}, {y}, {angle} gr, R={r}, num={numTail}(id={tailID}), {sb.ToString()}>";
+        return $"<{x}, {y}, {angle} gr, R={r}, num={numTail}(id={tailID})>";
     }
 }
 

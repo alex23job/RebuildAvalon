@@ -5,7 +5,7 @@ public class HexTail : MonoBehaviour
     [SerializeField] private int tailID;
     [SerializeField] private int tailDoors;
     [SerializeField] private float speedRotation = 22.5f;
-    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float moveSpeed = 10f;
 
     private HexsGame hexsGame = null;
 
@@ -92,8 +92,8 @@ public class HexTail : MonoBehaviour
     {
         //print($"SetTargetWay =>> tg={tg} rot={rot}");
         target = tg;
-        //if (rot > 0) transform.Rotate(-180f, rot, 0, Space.World);
-        if (rot > 0) transform.rotation = Quaternion.Euler(180f, rot, 0);
+        if (rot > 0) transform.Rotate(0, rot, 0, Space.World);
+        //if (rot > 0) transform.rotation = Quaternion.Euler(180f, rot, 0);
         isMovement = true;
     }
 
