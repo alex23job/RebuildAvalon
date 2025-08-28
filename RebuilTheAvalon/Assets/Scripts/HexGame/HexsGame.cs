@@ -33,12 +33,6 @@ public class HexsGame : MonoBehaviour
         CreateEnemyHex();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     private void GenerateBoard()
     {
         int i, x, y;
@@ -135,7 +129,7 @@ public class HexsGame : MonoBehaviour
         if ((numberWiner > 0) && (gameUI != null)) Invoke("ViewEndPanel", 2f); 
 
         int numTail, rndTail = UnityEngine.Random.Range(0, 24);
-        int[] nums = new int[24] { 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 7 };
+        int[] nums = new int[24] { 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 4, 4, 5, 5, 6, 6, 7 };
         //int[] nums = new int[24] { 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 5, 5, 5, 2, 3, 3 };  //  без перекрёстка и джокера
         numTail = nums[rndTail];
         GameObject hexTail = Instantiate(hexTails[numTail], pos, Quaternion.Euler(180f, 0, 0));
