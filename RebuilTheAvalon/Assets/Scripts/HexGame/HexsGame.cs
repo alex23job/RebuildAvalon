@@ -133,7 +133,7 @@ public class HexsGame : MonoBehaviour
         //int[] nums = new int[24] { 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 5, 5, 5, 2, 3, 3 };  //  без перекрёстка и джокера
         numTail = nums[rndTail];
         GameObject hexTail = Instantiate(hexTails[numTail], pos, Quaternion.Euler(180f, 0, 0));
-        hexTail.GetComponent<HexTail>().SetParams(numTail, this);
+        hexTail.GetComponent<HexTail>().SetParams(numTail, this, pos.x > 0);
         return hexTail;
     }
 

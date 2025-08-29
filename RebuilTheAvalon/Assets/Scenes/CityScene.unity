@@ -216,6 +216,7 @@ GameObject:
   - component: {fileID: 7572461}
   - component: {fileID: 7572460}
   - component: {fileID: 7572459}
+  - component: {fileID: 7572463}
   m_Layer: 3
   m_Name: Cube
   m_TagString: Untagged
@@ -312,6 +313,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7572463
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7572456}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e5ca12b219334046b8194cb4c4c6aa5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  nameScene: MittenGameScene
+  IDS_Game: IDS_MittenGame
+  panel_UI_Game: {fileID: 0}
+  player: {fileID: 1014680262}
 --- !u!1 &55486070
 GameObject:
   m_ObjectHideFlags: 0
@@ -1794,6 +1811,7 @@ GameObject:
   - component: {fileID: 483581045}
   - component: {fileID: 483581044}
   - component: {fileID: 483581043}
+  - component: {fileID: 483581047}
   m_Layer: 3
   m_Name: Cylinder
   m_TagString: Untagged
@@ -1892,6 +1910,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &483581047
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 483581042}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e5ca12b219334046b8194cb4c4c6aa5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  nameScene: 
+  IDS_Game: IDS_LettersGame
+  panel_UI_Game: {fileID: 597946610}
+  player: {fileID: 1014680262}
 --- !u!1 &521612247
 GameObject:
   m_ObjectHideFlags: 0
@@ -3686,6 +3720,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nameScene: HexGameScene
   IDS_Game: IDS_HexGameName
+  panel_UI_Game: {fileID: 0}
   player: {fileID: 1014680262}
 --- !u!135 &914307593
 SphereCollider:

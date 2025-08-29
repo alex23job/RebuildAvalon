@@ -146,5 +146,15 @@ public class PlayerInteract : MonoBehaviour
             //_lastCollider.gameObject.layer = LayerMask.NameToLayer("Interaction");
             _lastCollider = null;
         }
+        if (_isInteract)
+        {
+            if (_currentInteractable != null)
+            {
+                _currentInteractable.EndInteract();
+                _currentInteractable = null;
+            }
+            _isInteract = false;
+        }
+
     }
 }

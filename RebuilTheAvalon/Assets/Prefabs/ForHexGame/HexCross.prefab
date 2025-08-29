@@ -106,7 +106,7 @@ MonoBehaviour:
   tailID: 6
   tailDoors: 21
   speedRotation: 45
-  moveSpeed: 5
+  moveSpeed: 10
 --- !u!65 &1351961140333342112
 BoxCollider:
   m_ObjectHideFlags: 0

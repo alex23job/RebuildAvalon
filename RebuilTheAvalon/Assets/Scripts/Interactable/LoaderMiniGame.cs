@@ -6,10 +6,11 @@ public class LoaderMiniGame : MonoBehaviour, IInteractable
 {
     [SerializeField] private string nameScene;
     [SerializeField] private string IDS_Game;
+    [SerializeField] private GameObject panel_UI_Game = null;
     [SerializeField] private PlayerInteract player;
     public void EndInteract()
     {
-        throw new System.NotImplementedException();
+        if (panel_UI_Game != null) panel_UI_Game.SetActive(false);
     }
 
     public string GetHint()
@@ -27,7 +28,11 @@ public class LoaderMiniGame : MonoBehaviour, IInteractable
     public void Interact()
     {
         player.SavePosAndRot();
-        SceneManager.LoadScene(nameScene);
+        if (panel_UI_Game != null)
+        {   //  надо вызывать какой-то метод класса UI игры для инициализации переменных игры 
+            panel_UI_Game.SetActive(true);
+        }
+        else SceneManager.LoadScene(nameScene);
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
